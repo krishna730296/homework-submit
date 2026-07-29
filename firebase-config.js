@@ -1,15 +1,9 @@
-// ============================================================
-// PASTE YOUR FIREBASE CONFIG HERE
-// Go to: https://console.firebase.google.com
-// Select your project → ⚙️ Project Settings → General → Your apps → Web app
-// Copy the config object and paste below
-// ============================================================
-
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyC14woNT0ELthFyCWd2PS2XrloqY99tr48",
+    authDomain: "learning-2cfb2.firebaseapp.com",
+    projectId: "learning-2cfb2",
+    storageBucket: "learning-2cfb2.firebasestorage.app",
+    messagingSenderId: "466931263615",
+    appId: "1:466931263615:web:10e839e2f20193d18af74a",
+    measurementId: "G-RMM440N4T9"
 };
