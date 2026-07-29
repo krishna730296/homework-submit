@@ -1,12 +1,7 @@
-const STORAGE_KEY = 'hw_submissions';
-
-function getSubmissions() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-}
-
-function saveSubmissions(subs) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
-}
+// Init Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const COL = 'submissions';
 
 function formatDate(iso) {
     const d = new Date(iso);
@@ -19,6 +14,12 @@ function showAlert(msg, type) {
     if (!box) return;
     box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
     setTimeout(() => box.innerHTML = '', 4000);
+}
+
+function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
 }
 
 function encodeFile(file) {
@@ -75,29 +76,39 @@ if (form) {
         btn.textContent = 'Saving...';
 
         let fileData = null;
+        let fileNameVal = null;
+        let fileType = null;
         if (file) {
-            try { fileData = await encodeFile(file); }
-            catch { showAlert('Failed to read file.', 'error'); btn.disabled = false; btn.textContent = 'Submit Homework'; return; }
+            try {
+                fileData = await encodeFile(file);
+                fileNameVal = file.name;
+                fileType = file.type;
+            } catch {
+                showAlert('Failed to read file.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Submit Homework';
+                return;
+            }
         }
 
-        const submission = {
-            id: Date.now(),
-            name,
-            subject,
-            notes,
-            fileName: file ? file.name : null,
-            fileType: file ? file.type : null,
-            fileData,
-            timestamp: new Date().toISOString()
-        };
+        try {
+            await db.collection(COL).add({
+                name,
+                subject,
+                notes,
+                fileName: fileNameVal,
+                fileType,
+                fileData,
+                timestamp: new Date().toISOString()
+            });
 
-        const subs = getSubmissions();
-        subs.push(submission);
-        saveSubmissions(subs);
+            showAlert('Homework submitted!', 'success');
+            form.reset();
+            fileName.style.display = 'none';
+        } catch (err) {
+            showAlert('Error saving: ' + err.message, 'error');
+        }
 
-        showAlert('Homework submitted!', 'success');
-        form.reset();
-        fileName.style.display = 'none';
         btn.disabled = false;
         btn.textContent = 'Submit Homework';
     });
@@ -110,69 +121,87 @@ if (subList) {
 
     const clearBtn = document.getElementById('clear-all');
     if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            if (confirm('Delete ALL submissions? This cannot be undone.')) {
-                localStorage.removeItem(STORAGE_KEY);
-                renderSubmissions();
-            }
+        clearBtn.addEventListener('click', async () => {
+            if (!confirm('Delete ALL submissions? This cannot be undone.')) return;
+            const snap = await db.collection(COL).get();
+            const batch = db.batch();
+            snap.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            renderSubmissions();
         });
     }
 }
 
-function renderSubmissions() {
-    const subs = getSubmissions().reverse();
-    const countEl = document.getElementById('sub-count');
-    const subjectCountEl = document.getElementById('subject-count');
-    if (countEl) countEl.textContent = subs.length;
-    if (subjectCountEl) subjectCountEl.textContent = new Set(subs.map(s => s.subject)).size;
+async function renderSubmissions() {
+    subList.innerHTML = '<div class="empty">Loading...</div>';
 
-    if (subs.length === 0) {
-        subList.innerHTML = '<div class="empty"><h3>No submissions yet</h3><p>Go submit your first homework!</p></div>';
-        return;
+    try {
+        const snap = await db.collection(COL).orderBy('timestamp', 'desc').get();
+        const subs = [];
+        snap.forEach(doc => subs.push({ id: doc.id, ...doc.data() }));
+
+        const countEl = document.getElementById('sub-count');
+        const subjectCountEl = document.getElementById('subject-count');
+        if (countEl) countEl.textContent = subs.length;
+        if (subjectCountEl) subjectCountEl.textContent = new Set(subs.map(s => s.subject)).size;
+
+        if (subs.length === 0) {
+            subList.innerHTML = '<div class="empty"><h3>No submissions yet</h3><p>Be the first to submit!</p></div>';
+            return;
+        }
+
+        subList.innerHTML = subs.map(s => `
+            <div class="sub-card">
+                <div class="sub-info">
+                    <div class="sub-name">${esc(s.name)}</div>
+                    <span class="sub-badge">${esc(s.subject)}</span>
+                    <div class="sub-meta">${formatDate(s.timestamp)}</div>
+                    ${s.notes ? `<div class="sub-notes">"${esc(s.notes)}"</div>` : ''}
+                </div>
+                <div class="sub-actions">
+                    ${s.fileName ? `<button class="btn btn-sm btn-outline" onclick="downloadFile('${s.id}')">Download</button>` : ''}
+                    <button class="btn btn-sm btn-wsp" onclick="sendWsp('${s.id}')">WhatsApp</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSub('${s.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        subList.innerHTML = `<div class="empty"><h3>Error loading</h3><p>${esc(err.message)}</p></div>`;
     }
-
-    subList.innerHTML = subs.map(s => `
-        <div class="sub-card">
-            <div class="sub-info">
-                <div class="sub-name">${esc(s.name)}</div>
-                <span class="sub-badge">${esc(s.subject)}</span>
-                <div class="sub-meta">${formatDate(s.timestamp)}</div>
-                ${s.notes ? `<div class="sub-notes">"${esc(s.notes)}"</div>` : ''}
-            </div>
-            <div class="sub-actions">
-                ${s.fileName ? `<button class="btn btn-sm btn-outline" onclick="downloadFile(${s.id})">Download</button>` : ''}
-                <button class="btn btn-sm btn-wsp" onclick="sendWsp(${s.id})">WhatsApp</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteSub(${s.id})">Delete</button>
-            </div>
-        </div>
-    `).join('');
 }
 
-function esc(str) {
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
+async function downloadFile(id) {
+    try {
+        const doc = await db.collection(COL).doc(id).get();
+        const s = doc.data();
+        if (!s || !s.fileData) return;
+        const a = document.createElement('a');
+        a.href = s.fileData;
+        a.download = s.fileName;
+        a.click();
+    } catch (err) {
+        alert('Download failed: ' + err.message);
+    }
 }
 
-function downloadFile(id) {
-    const s = getSubmissions().find(x => x.id === id);
-    if (!s || !s.fileData) return;
-    const a = document.createElement('a');
-    a.href = s.fileData;
-    a.download = s.fileName;
-    a.click();
+async function sendWsp(id) {
+    try {
+        const doc = await db.collection(COL).doc(id).get();
+        const s = doc.data();
+        if (!s) return;
+        const text = `📚 Homework Submission\n👤 ${s.name}\n📖 ${s.subject}\n📝 ${s.notes || 'No notes'}\n📅 ${formatDate(s.timestamp)}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    } catch (err) {
+        alert('Failed: ' + err.message);
+    }
 }
 
-function sendWsp(id) {
-    const s = getSubmissions().find(x => x.id === id);
-    if (!s) return;
-    const text = `📚 Homework Submission\n👤 ${s.name}\n📖 ${s.subject}\n📝 ${s.notes || 'No notes'}\n📅 ${formatDate(s.timestamp)}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-}
-
-function deleteSub(id) {
+async function deleteSub(id) {
     if (!confirm('Delete this submission?')) return;
-    const subs = getSubmissions().filter(x => x.id !== id);
-    saveSubmissions(subs);
-    renderSubmissions();
+    try {
+        await db.collection(COL).doc(id).delete();
+        renderSubmissions();
+    } catch (err) {
+        alert('Delete failed: ' + err.message);
+    }
 }
