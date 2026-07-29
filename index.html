@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Submit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-inner">
+            <a href="/" class="logo">HomeworkSubmit</a>
+            <div class="nav-links">
+                <a href="/" class="active">Submit</a>
+                <a href="submissions.html">View All</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="card form-card">
+            <h1>Submit Homework</h1>
+            <p class="subtitle">Upload your assignment — it saves in your browser and sends a WhatsApp alert.</p>
+
+            <div id="alert-box"></div>
+
+            <form id="hw-form">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" placeholder="e.g. Krishna Chaudhary" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" required>
+                        <option value="">Select subject...</option>
+                        <option>Mathematics</option>
+                        <option>Physics</option>
+                        <option>Chemistry</option>
+                        <option>Biology</option>
+                        <option>English</option>
+                        <option>History</option>
+                        <option>Computer Science</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload File</label>
+                    <div class="file-drop" id="file-drop">
+                        <input type="file" id="file" hidden>
+                        <div class="file-icon">+</div>
+                        <p>Click or drag to upload</p>
+                        <span class="file-hint">PDF, Images, Docs, ZIP (max 5MB)</span>
+                        <span class="file-name" id="file-name"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea id="notes" rows="3" placeholder="Any notes for your teacher..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn">Submit Homework</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
