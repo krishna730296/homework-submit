@@ -5,6 +5,7 @@ body {
     background: #0b0d12;
     color: #e4e7ed;
     min-height: 100vh;
+    background-image: radial-gradient(circle at 15% 0%, #1a2237 0%, transparent 38%), radial-gradient(circle at 90% 10%, #1e2a4a 0%, transparent 35%);
 }
 
 /* Nav */
@@ -52,6 +53,7 @@ nav {
     border: 1px solid #1e2434;
     border-radius: 14px;
     padding: 40px 32px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
 }
 
 /* Form */
@@ -64,6 +66,21 @@ nav {
     color: #6b7280;
     font-size: 0.9rem;
     margin-bottom: 32px;
+}
+.quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: -12px 0 24px;
+}
+.chip {
+    background: #1a2030;
+    border: 1px solid #2a3040;
+    color: #a9b6d2;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 6px 10px;
 }
 .form-group { margin-bottom: 22px; }
 .form-group label {
@@ -90,6 +107,12 @@ input:focus, select:focus, textarea:focus {
 }
 select { cursor: pointer; }
 textarea { resize: vertical; }
+.field-meta {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: right;
+}
 
 /* File drop */
 .file-drop {
@@ -102,6 +125,10 @@ textarea { resize: vertical; }
 }
 .file-drop:hover { border-color: #6c8aff; background: #161b26; }
 .file-drop.dragover { border-color: #6c8aff; background: #1a2030; }
+.file-drop.has-file {
+    border-color: #3b82f6;
+    background: #131a2a;
+}
 .file-icon { font-size: 1.8rem; color: #6c8aff; margin-bottom: 6px; }
 .file-drop p { font-size: 0.9rem; color: #8b95a9; }
 .file-hint { font-size: 0.75rem; color: #4b5563; display: block; margin-top: 4px; }
@@ -243,7 +270,19 @@ textarea { resize: vertical; }
 }
 .clear-btn:hover { background: #2d1215; }
 
+.filters {
+    margin-bottom: 18px;
+    padding: 16px;
+}
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.filter-grid .form-group { margin: 0; }
+
 @media (max-width: 600px) {
     .card { padding: 28px 20px; }
     .sub-card { flex-direction: column; align-items: flex-start; }
+    .filter-grid { grid-template-columns: 1fr; }
 }

@@ -23,6 +23,11 @@
         <div class="card form-card">
             <h1>Submit Homework</h1>
             <p class="subtitle">Upload your assignment — shared across all students.</p>
+            <div class="quick-chips">
+                <span class="chip">⚡ Fast submit</span>
+                <span class="chip">📁 File support</span>
+                <span class="chip">🧠 Smart preview</span>
+            </div>
 
             <div id="alert-box"></div>
 
@@ -61,6 +66,7 @@
                 <div class="form-group">
                     <label for="notes">Notes (optional)</label>
                     <textarea id="notes" rows="3" placeholder="Any notes for your teacher..."></textarea>
+                    <div class="field-meta"><span id="notes-count">0</span>/200 characters</div>
                 </div>
 
                 <button type="submit" class="btn btn-primary" id="submit-btn">Submit Homework</button>
